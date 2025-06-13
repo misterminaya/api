@@ -6,7 +6,7 @@ from datetime import datetime
 pymysql.install_as_MySQLdb()
 
 database = MySQLDatabase(
-    'fastapi_project',
+    'peliculas',
     user='root',
     password='secret',
     host='mysql',
