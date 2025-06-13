@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  fastapi-app:
+    build: .
+    container_name: fastapi-container
+    ports:
+      - "8000:80"
+    depends_on:
+      - mysql
+    volumes:
+      - .:/app  
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=peliculas
+      - DB_USER=root
+      - DB_PASSWORD=secret
+      - PYTHONPATH=/app
+    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: peliculas
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:

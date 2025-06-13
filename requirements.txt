@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+peewee
+pymysql
+cryptography
+python-dotenv
