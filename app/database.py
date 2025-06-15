@@ -29,6 +29,16 @@ class User(BaseModel):
         table_name = 'users'
 
     @classmethod
+    def authenticate(cls, username: str, password: str):
+        hashed_password = cls.create_password(password)
+        try:
+            user = cls.get(cls.username == username, cls.password == hashed_password)
+            return user
+        except cls.DoesNotExist:
+            return None
+        
+        
+    @classmethod
     def create_password(self, password: str):
         h = hashlib.md5()
         

@@ -4,3 +4,8 @@ peewee
 pymysql
 cryptography
 python-dotenv
+requests
+python-multipart
+pyjwt
+
+
