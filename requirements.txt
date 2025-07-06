@@ -1,7 +1,7 @@
 fastapi
 uvicorn[standard]
-peewee
-pymysql
+SQLAlchemy
+psycopg2-binary
 cryptography
 python-dotenv
 requests
