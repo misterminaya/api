@@ -11,6 +11,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from .database import User
 from .database import Movie
 from .database import UserReview
+from .database import OTPCode
 
 from .router import users_router
 from .router import reviews_router
@@ -41,6 +42,11 @@ async def authenticate_user(data: OAuth2PasswordRequestForm = Depends()):
     user = User.authenticate(username=data.username, password=data.password)
 
     if user:
+        if not user.is_verified:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Debes verificar tu cuenta antes de iniciar sesion.",
+            )
         return {
             'access_token': create_access_token(user),
             'token_type': 'bearer'
@@ -61,7 +67,7 @@ def startup():
         try:
             if connection.is_closed():
                 connection.connect()
-            connection.create_tables([User, Movie, UserReview])
+            connection.create_tables([User, Movie, UserReview, OTPCode])
             logging.info("✅ Conectado a MySQL y tablas listas.")
             break
         except OperationalError as e:

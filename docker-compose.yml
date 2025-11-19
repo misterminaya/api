@@ -17,6 +17,13 @@ services:
       - DB_USER=root
       - DB_PASSWORD=secret
       - PYTHONPATH=/app
+      # Email configuration - update these with your SMTP credentials
+      - MAIL_USERNAME=your_email@gmail.com
+      - MAIL_PASSWORD=your_app_password
+      - MAIL_FROM=your_email@gmail.com
+      - MAIL_PORT=587
+      - MAIL_SERVER=smtp.gmail.com
+      - MAIL_FROM_NAME=Movie Reviews API
     command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
 
   mysql:

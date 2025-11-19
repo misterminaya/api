@@ -1,5 +1,5 @@
 from typing import Any
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from pydantic import validator
 
 from peewee import ModelSelect
@@ -24,6 +24,7 @@ class ResponseModel(BaseModel):
 
 class UserRequestModel(BaseModel):
     username: str
+    email: EmailStr
     password: str
 
     @validator('username')
@@ -32,10 +33,37 @@ class UserRequestModel(BaseModel):
             raise ValueError('El nombre de usuario debe tener al menos 3 caracteres.')
         return username
 
+    @validator('password')
+    def password_validator(cls, password):
+        if len(password) < 6:
+            raise ValueError('La contrasena debe tener al menos 6 caracteres.')
+        return password
+
 
 class UserResponseModel(ResponseModel):
     id: int
     username: str
+    email: str
+    is_verified: bool
+
+
+class OTPVerifyRequestModel(BaseModel):
+    email: EmailStr
+    code: str
+
+    @validator('code')
+    def code_validator(cls, code):
+        if len(code) != 6 or not code.isdigit():
+            raise ValueError('El codigo OTP debe ser de 6 digitos.')
+        return code
+
+
+class ResendOTPRequestModel(BaseModel):
+    email: EmailStr
+
+
+class MessageResponseModel(BaseModel):
+    message: str
 
 #------------------------ Movie ------------------------
 
