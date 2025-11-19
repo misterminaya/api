@@ -1,11 +1,31 @@
-fastapi
-uvicorn[standard]
-peewee
-pymysql
-cryptography
-python-dotenv
-requests
-python-multipart
-pyjwt
+# Vailoo API Dependencies
+# Production-ready requirements for event platform
 
+# Web Framework
+fastapi==0.109.2
+uvicorn[standard]==0.27.1
+python-multipart==0.0.9
 
+# Database
+peewee==3.17.0
+PyMySQL==1.1.0
+
+# Authentication & Security
+PyJWT==2.8.0
+passlib[bcrypt]==1.7.4
+cryptography==42.0.2
+
+# Data Validation
+pydantic==2.6.1
+pydantic-settings==2.1.0
+email-validator==2.1.0.post1
+
+# Environment
+python-dotenv==1.0.1
+
+# HTTP Client
+httpx==0.26.0
+
+# Testing (dev only)
+pytest==8.0.0
+pytest-asyncio==0.23.4

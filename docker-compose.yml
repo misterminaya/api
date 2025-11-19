@@ -1,35 +1,81 @@
-version: '3.9'
+# Vailoo API Docker Compose
+# Development and production configuration
+
+version: '3.8'
 
 services:
-  fastapi-app:
-    build: .
-    container_name: fastapi-container
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vailoo-api
+    restart: unless-stopped
     ports:
-      - "8000:80"
-    depends_on:
-      - mysql
-    volumes:
-      - .:/app  
+      - "8000:8000"
     environment:
+      # Application
+      - APP_NAME=Vailoo API
+      - DEBUG=${DEBUG:-false}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+
+      # Security - MUST be set in production
+      - SECRET_KEY=${SECRET_KEY:-development-secret-key-change-in-production}
+
+      # Database
       - DB_HOST=mysql
       - DB_PORT=3306
-      - DB_NAME=peliculas
-      - DB_USER=root
-      - DB_PASSWORD=secret
-      - PYTHONPATH=/app
-    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+      - DB_NAME=${DB_NAME:-vailoo}
+      - DB_USER=${DB_USER:-vailoo}
+      - DB_PASSWORD=${DB_PASSWORD:-vailoo_password}
+
+      # CORS
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
+
+      # Rate Limiting
+      - RATE_LIMIT_REQUESTS=${RATE_LIMIT_REQUESTS:-100}
+      - RATE_LIMIT_WINDOW=${RATE_LIMIT_WINDOW:-60}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - vailoo-network
+    volumes:
+      - .:/app
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   mysql:
     image: mysql:8.0
-    container_name: mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: peliculas
+    container_name: vailoo-mysql
+    restart: unless-stopped
     ports:
       - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - MYSQL_DATABASE=${DB_NAME:-vailoo}
+      - MYSQL_USER=${DB_USER:-vailoo}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-vailoo_password}
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - vailoo-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+networks:
+  vailoo-network:
+    driver: bridge
 
 volumes:
   mysql_data:
+    driver: local
